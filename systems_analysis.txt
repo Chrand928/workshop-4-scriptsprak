@@ -50,3 +50,14 @@ Extension Amount Size (MB) Size (KB)
 .rules         2 0,001843       1,89
 
 
+LARGEST LOG FILES (TOP 5)
+----------------------------
+File Name               Size (MB)
+---------               ---------
+security-2024-10-13.log 0,001312
+access-2024-10-14.log   0,001276
+system-2024-10-14.log   0,001243
+security-2024-10-14.log 0,001225
+system-2024-10-13.log   0,001035
+
+

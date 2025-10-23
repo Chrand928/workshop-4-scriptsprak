@@ -41,14 +41,6 @@ $allFiles = Get-ChildItem -Path "network_configs" -Recurse -Include *.conf, *.ru
 # Start of the report
 $report = ""
 
-$report += @"
-===============================
-        SYSTEMS ANALYSIS
-===============================
-
-FILE OVERVIEW
-------------------------------------
-"@
 
 # Creates a list of the files and adds it to the report
 $formattedFiles = $allFiles | Select-Object `
@@ -61,6 +53,15 @@ $formattedFiles = $allFiles | Select-Object `
 } |
 Sort-Object "Last Update" -Descending |
 Format-Table -AutoSize | Out-String
+
+$report += @"
+===============================
+        SYSTEMS ANALYSIS
+===============================
+
+FILE OVERVIEW
+------------------------------------
+"@
 
 $report += $formattedFiles
 
@@ -107,6 +108,27 @@ FILETYPES AND TOTAL SIZE
 ----------------------------
 "@
 $report += $fileTypeList
+
+
+# Finds the .log files
+$logFiles = Get-ChildItem -Path "network_configs" -Recurse -Include *.log
+
+$largestLogs = $logFiles | Sort-Object Length -Descending | Select-Object -First 5
+
+# Collect the 5 largest .log files
+$largestLogList = $largestLogs | Select-Object `
+@{Name = "File Name"; Expression = { $_.Name } }, 
+@{Name = "Size (MB)"; Expression = { '{0:N6}' -f ($_.Length / 1MB) } } |
+Format-Table -AutoSize | Out-String
+
+$report += @"
+
+LARGEST LOG FILES (TOP 5)
+----------------------------
+"@
+
+$report += $largestLogList
+
 
 
 # Writes the information to the .txt report
