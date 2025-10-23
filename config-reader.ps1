@@ -1,8 +1,9 @@
 ###
 
-function Get-LastDate {
-        return "2024-10-14"
-}
+$now = Get-Date "2024-10-14"
+$weekAgo = $now.AddDays(-7)
+
+
 
 # Function to look for a pattern in the files which lets us find
 # the dates of when the files were last modified
@@ -58,9 +59,37 @@ $formattedFiles = $allFiles | Select-Object `
                 if ($lastDate -eq "UNKNOWN") { "UNKNOWN" } else { $lastDate }
         }
 } |
+Sort-Object "Last Update" -Descending |
 Format-Table -AutoSize | Out-String
 
 $report += $formattedFiles
+
+
+$recentFiles = $allFiles | Where-Object {
+        $lastDate = Get-LastDate -FilePath $_.FullName
+        if ($lastDate -eq "UNKNOWN") { return $false }
+        $parsedDate = [DateTime]::Parse($lastDate)
+        return $parsedDate -ge $weekAgo
+}
+
+# Skapa tabell
+$recentTable = $recentFiles | Select-Object `
+@{Name = "File Name"; Expression = { $_.Name } },
+@{Name = "Size (KB)"; Expression = { [Math]::Round($_.Length / 1KB, 2) } },
+@{Name = "Last Update"; Expression = { Get-LastDate -FilePath $_.FullName } } |
+Sort-Object "Last Update" -Descending |
+Format-Table -AutoSize | Out-String
+
+# Lägg till i rapporten
+$report += @"
+
+RECENTLY MODIFIED FILES (< 7 dagar)
+----------------------------------------
+"@
+
+$report += $recentTable
+
+
 
 # Writes the information to the .txt report
 $report | Out-File -FilePath "systems_analysis.txt" -Encoding UTF8
