@@ -40,3 +40,13 @@ SW-CORE-02.conf              0,59 2024-10-09
 RT-LAGER-01.conf             0,59 2024-10-08
 
 
+FILETYPES AND TOTAL SIZE
+----------------------------
+Extension Amount Size (MB) Size (KB)
+--------- ------ --------- ---------
+.bak           8 0,000329       0,34
+.conf          7 0,004109       4,21
+.log           5 0,006091       6,24
+.rules         2 0,001843       1,89
+
+

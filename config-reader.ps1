@@ -72,23 +72,41 @@ $recentFiles = $allFiles | Where-Object {
         return $parsedDate -ge $weekAgo
 }
 
-# Skapa tabell
-$recentTable = $recentFiles | Select-Object `
+# Creates list of recently modified files
+$recentList = $recentFiles | Select-Object `
 @{Name = "File Name"; Expression = { $_.Name } },
 @{Name = "Size (KB)"; Expression = { [Math]::Round($_.Length / 1KB, 2) } },
 @{Name = "Last Update"; Expression = { Get-LastDate -FilePath $_.FullName } } |
 Sort-Object "Last Update" -Descending |
 Format-Table -AutoSize | Out-String
 
-# Lägg till i rapporten
 $report += @"
 
 RECENTLY MODIFIED FILES (< 7 dagar)
 ----------------------------------------
 "@
 
-$report += $recentTable
+$report += $recentList
 
+
+# Groups files by file extension
+$fileGroups = Get-ChildItem -Path "network_configs" -File -Recurse |
+Group-Object -Property Extension
+
+# Creates a list showing the number of files and their size in MB and KB
+$fileTypeList = $fileGroups | Select-Object `
+@{Name = "Extension"; Expression = { $_.Name } },
+@{Name = "Amount"; Expression = { $_.Count } },
+@{Name = "Size (MB)"; Expression = { '{0:N6}' -f (($_.Group | Measure-Object Length -Sum).Sum / 1MB) } }, 
+@{Name = "Size (KB)"; Expression = { [Math]::Round(($_.Group | Measure-Object Length -Sum).Sum / 1KB, 2) } } |
+Format-Table -AutoSize | Out-String
+
+$report += @"
+
+FILETYPES AND TOTAL SIZE
+----------------------------
+"@
+$report += $fileTypeList
 
 
 # Writes the information to the .txt report
