@@ -163,7 +163,7 @@ else {
 }
 
 
-# 
+# Searches for the keywords in the log files
 $keywords = @("ERROR", "FAILED", "DENIED")
 $logFiles = Get-ChildItem -Path "network_configs" -Filter "*.log" -Recurse
 
@@ -174,6 +174,7 @@ SECURITY ISSUES IN LOG FILES
 
 "@
 
+# Makes a list to add to the report
 foreach ($log in $logFiles) {
         $report += "File: $($log.Name)`r`n"
 
@@ -186,6 +187,24 @@ foreach ($log in $logFiles) {
 }
 
 
+
+# File inventory add to CSV
+$configFiles = Get-ChildItem -Path "network_configs" -Recurse -Include *.conf, *.rules
+
+$inventory = @()
+foreach ($file in $configFiles) {
+        $parsedDate = Get-LastDate -FilePath $file.FullName
+        $inventory += [PSCustomObject]@{
+                Name         = $file.Name
+                RelativePath = $file.FullName.Split("network_configs")[1].TrimStart("\\")
+                SizeBytes    = $file.Length
+                LastModified = if ($parsedDate -eq "UNKNOWN") { "UNKNOWN" } else { $parsedDate }
+        }
+}
+
+
+# Export to CSV
+$inventory | Export-Csv -Path "config_inventory.csv" -NoTypeInformation -Encoding UTF8
 
 
 
