@@ -208,5 +208,50 @@ $inventory | Export-Csv -Path "config_inventory.csv" -NoTypeInformation -Encodin
 
 
 
+function Find-SecurityIssues {
+        param (
+                [string]$BasePath = "network_configs",
+                [string]$OutputCsv = "security_review.csv"
+        )
+
+        # Patterns to search for
+        $secPatterns = @(
+                "password\s+\S+",         
+                "secret\s+\S+",           
+                "\bpublic\b",             
+                "\bprivate\b",            
+                "enable password\s+\S+"   
+        )
+
+        $results = @()
+
+        # Collect all .conf and .rules files
+        $files = Get-ChildItem -Path $BasePath -Recurse -Include *.conf, *.rules
+
+        foreach ($file in $files) {
+                foreach ($secPattern in $secPatterns) {
+                        $secMatches = Select-String -Path $file.FullName -Pattern $secPattern -AllMatches
+                        foreach ($secMatch in $secMatches) {
+                                $results += [PSCustomObject]@{
+                                        FileName     = $file.Name
+                                        RelativePath = $file.FullName.Split($BasePath)[1].TrimStart("\\")
+                                        LineNumber   = $secMatch.LineNumber
+                                        Match        = $secMatch.Line.Trim()
+                                        Pattern      = $secPattern
+                                }
+                        }
+                }
+        }
+
+        # Export to CSV
+        if ($results.Count -gt 0) {
+                $results | Export-Csv -Path $OutputCsv -NoTypeInformation -Encoding UTF8
+                Write-Host "Security review finished. Results saved in $OutputCsv"
+        }
+        else {
+                Write-Host "No security issues found."
+        }
+}
+
 # Writes the information to the .txt report
 $report | Out-File -FilePath "systems_analysis.txt" -Encoding UTF8
