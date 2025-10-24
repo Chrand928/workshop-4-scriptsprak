@@ -78,3 +78,31 @@ UNIQUE IP-ADDRESSES
  - 203.0.113.1
  - 203.0.113.5
 
+SECURITY ISSUES IN LOG FILES
+----------------------------------------
+File: access-2024-10-14.log
+ - ERROR  : 0
+ - FAILED : 3
+ - DENIED : 1
+
+File: security-2024-10-13.log
+ - ERROR  : 6
+ - FAILED : 6
+ - DENIED : 1
+
+File: security-2024-10-14.log
+ - ERROR  : 6
+ - FAILED : 4
+ - DENIED : 1
+
+File: system-2024-10-13.log
+ - ERROR  : 5
+ - FAILED : 1
+ - DENIED : 0
+
+File: system-2024-10-14.log
+ - ERROR  : 5
+ - FAILED : 1
+ - DENIED : 0
+
+

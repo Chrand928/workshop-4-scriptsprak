@@ -130,7 +130,7 @@ LARGEST LOG FILES (TOP 5)
 $report += $largestLogList
 
 
-
+# Looks for IP address patterns to add to the report
 $ipPattern = "\b(?:\d{1,3}\.){3}\d{1,3}\b"
 $confFiles = Get-ChildItem -Path "network_configs" -Filter "*.conf" -Recurse
 
@@ -144,6 +144,7 @@ foreach ($file in $confFiles) {
         }
 }
 
+# Sorts IPs and removes default route (0.0.0.0) from showing up in the report
 $uniqueIPs = $ipMatches | Where-Object { $_ -ne "0.0.0.0" } | Sort-Object -Unique
 
 $report += @"
@@ -160,6 +161,30 @@ if ($uniqueIPs.Count -gt 0) {
 else {
         $report += "No IP-addresses found in .conf files`n"
 }
+
+
+# 
+$keywords = @("ERROR", "FAILED", "DENIED")
+$logFiles = Get-ChildItem -Path "network_configs" -Filter "*.log" -Recurse
+
+$report += @"
+
+SECURITY ISSUES IN LOG FILES
+----------------------------------------
+
+"@
+
+foreach ($log in $logFiles) {
+        $report += "File: $($log.Name)`r`n"
+
+        foreach ($keyword in $keywords) {
+                $count = (Select-String -Path $log.FullName -Pattern $keyword -SimpleMatch).Count
+                $report += (" - {0,-7}: {1}" -f $keyword, $count) + "`r`n"
+        }
+
+        $report += "`r`n"
+}
+
 
 
 
