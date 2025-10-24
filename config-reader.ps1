@@ -131,5 +131,38 @@ $report += $largestLogList
 
 
 
+$ipPattern = "\b(?:\d{1,3}\.){3}\d{1,3}\b"
+$confFiles = Get-ChildItem -Path "network_configs" -Filter "*.conf" -Recurse
+
+$ipMatches = @()
+foreach ($file in $confFiles) {
+        $lines = Get-Content -Path $file.FullName
+        foreach ($line in $lines) {
+                if ($line -match $ipPattern) {
+                        $ipMatches += ($line | Select-String -Pattern $ipPattern).Matches.Value
+                }
+        }
+}
+
+$uniqueIPs = $ipMatches | Where-Object { $_ -ne "0.0.0.0" } | Sort-Object -Unique
+
+$report += @"
+
+UNIQUE IP-ADDRESSES
+----------------------------
+
+"@
+
+
+if ($uniqueIPs.Count -gt 0) {
+        $report += ($uniqueIPs | ForEach-Object { " - $_" } | Out-String)
+}
+else {
+        $report += "No IP-addresses found in .conf files`n"
+}
+
+
+
+
 # Writes the information to the .txt report
 $report | Out-File -FilePath "systems_analysis.txt" -Encoding UTF8
