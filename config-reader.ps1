@@ -237,7 +237,6 @@ function Find-SecurityIssues {
                                         RelativePath = $file.FullName.Split($BasePath)[1].TrimStart("\\")
                                         LineNumber   = $secMatch.LineNumber
                                         Match        = $secMatch.Line.Trim()
-                                        Pattern      = $secPattern
                                 }
                         }
                 }
@@ -252,6 +251,8 @@ function Find-SecurityIssues {
                 Write-Host "No security issues found."
         }
 }
+
+Find-SecurityIssues -BasePath "network_configs" -OutputCsv "security_review.csv"
 
 # Writes the information to the .txt report
 $report | Out-File -FilePath "systems_analysis.txt" -Encoding UTF8
